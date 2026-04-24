@@ -1,5 +1,3 @@
-use core::num;
-
 use crate::{layers::{attention::self_attn::SelfAttention, linear::Linear}, tensor::matrix::{InitStrategy, Matrix}};
 
 pub struct MultiHeadAttention<const Dim: usize, const HeadDim: usize> {
@@ -20,17 +18,15 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
     }
 
     pub fn forward<const Seq: usize>(&self, x: &Matrix<Seq, Dim>) -> Matrix<Seq, Dim> {
-        let num_heads = self.heads.len();
-
         // first split the batches
-        let mut head_outputs: Vec<Matrix<Seq, HeadDim>> = self.heads.iter().enumerate().map(|(h, head)| {
+        let head_outputs: Vec<Matrix<Seq, HeadDim>> = self.heads.iter().enumerate().map(|(h, head)| {
             let mut slice = [[0.0; HeadDim]; Seq];
             for s in 0..Seq {
                 for d in 0..HeadDim {
-                    slice[s][h] = x.data[s][h * HeadDim + d];
+                    slice[s][d] = x.data[s][h * HeadDim + d];
                 }
             }
-            head.forward( &Matrix { data: slice} )
+            head.forward(&Matrix { data: slice })
         }).collect();
 
         let mut concatenated = [[0.0; Dim]; Seq];

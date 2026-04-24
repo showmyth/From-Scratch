@@ -1,12 +1,8 @@
-use std::ops::Mul;
-
 pub fn randn(rng: &mut u64) -> f64 {
-    // todo!()
-
-    let u1 = lcg_next(rng);
+    let u1 = 1.0 - lcg_next(rng);
     let u2 = lcg_next(rng);
 
-    (-2.0 * u1.ln().sqrt() * (2.0 * std::f64::consts::PI * u2)).cos()
+    (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos()
 }
 
 fn lcg_next(state: &mut u64) -> f64 {

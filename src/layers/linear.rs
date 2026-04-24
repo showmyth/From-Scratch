@@ -25,7 +25,7 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         let mut res = [0.0; OutputSize];
         for i in 0..OutputSize {
             for j in 0..InputSize {
-                res[i] += self.weights.get(i, j) * input.data[j];
+                res[i] += self.weights.get(j, i) * input.data[j];
             }
             res[i] += self.bias.data[i];
         }
@@ -39,7 +39,7 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         for s in 0..Seq {
             for i in 0..OutputSize {
                 for j in 0..InputSize {
-                    data[s][i] += self.weights.get(i, j) * input.data[s][j];
+                    data[s][i] += self.weights.get(j, i) * input.data[s][j];
                 }
                 data[s][i] += self.bias.data[i];
             }
