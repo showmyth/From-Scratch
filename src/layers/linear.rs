@@ -1,5 +1,6 @@
 use crate::tensor::array::Array;
-use crate::tensor::matrix::{Matrix, InitStrategy};
+use crate::tensor::matrix::{InitStrategy, Matrix};
+
 pub struct Linear<const InputSize: usize, const OutputSize: usize> {
     pub weights: Matrix<InputSize, OutputSize>,
     pub bias: Array<OutputSize>,
@@ -7,15 +8,17 @@ pub struct Linear<const InputSize: usize, const OutputSize: usize> {
     pub grad_bias: Option<Array<OutputSize>>,
 }
 
-impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSize>{
+impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSize> {
     pub fn new(seed: u64, strat: Option<InitStrategy>) -> Self {
         let mut rng = seed; // we need to make some global function for seeding, 
-                                 // so something like get_seed(), sort of copying
-                                 // np.random.seed().
+                             // so something like get_seed(), sort of copying
+                             // np.random.seed().
         let weights_data = Matrix::randn(&mut rng, strat);
-        Self { 
+        Self {
             weights: weights_data,
-            bias: Array { data: [0.0; OutputSize] },
+            bias: Array {
+                data: [0.0; OutputSize],
+            },
             grad_weights: None,
             grad_bias: None,
         }
@@ -33,7 +36,10 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         Array { data: res }
     }
 
-    pub fn forward_seq<const Seq: usize>(&self, input: &Matrix<Seq, InputSize>) -> Matrix<Seq, OutputSize> {
+    pub fn forward_seq<const Seq: usize>(
+        &self,
+        input: &Matrix<Seq, InputSize>,
+    ) -> Matrix<Seq, OutputSize> {
         let mut data = [[0.0; OutputSize]; Seq];
 
         for s in 0..Seq {
@@ -46,7 +52,5 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         }
 
         Matrix { data }
-
-
     }
 }

@@ -1,15 +1,22 @@
-use crate::{layers::{attention::self_attn::SelfAttention, linear::Linear}, tensor::matrix::{InitStrategy, Matrix}};
+use crate::{
+    layers::{attention::self_attn::Attention, linear::Linear},
+    tensor::matrix::{InitStrategy, Matrix},
+};
 
 pub struct MultiHeadAttention<const Dim: usize, const HeadDim: usize> {
-    heads: Vec<SelfAttention<HeadDim>>,
+    heads: Vec<Attention<HeadDim>>,
     w_o: Linear<Dim, Dim>,
-} 
+}
 
 impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
     pub fn new(num_heads: usize, seed: u64, strategy: Option<InitStrategy>) -> Self {
-        assert_eq!(Dim, HeadDim * num_heads, "Dim must equal HeadDim * num_heads");
+        assert_eq!(
+            Dim,
+            HeadDim * num_heads,
+            "Dim must equal HeadDim * num_heads"
+        );
         let heads = (0..num_heads)
-            .map(|i| SelfAttention::new(seed + i as u64, strategy))
+            .map(|i| Attention::new(seed + i as u64, strategy))
             .collect();
         Self {
             heads,
@@ -19,15 +26,20 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
 
     pub fn forward<const Seq: usize>(&self, x: &Matrix<Seq, Dim>) -> Matrix<Seq, Dim> {
         // first split the batches
-        let head_outputs: Vec<Matrix<Seq, HeadDim>> = self.heads.iter().enumerate().map(|(h, head)| {
-            let mut slice = [[0.0; HeadDim]; Seq];
-            for s in 0..Seq {
-                for d in 0..HeadDim {
-                    slice[s][d] = x.data[s][h * HeadDim + d];
+        let head_outputs: Vec<Matrix<Seq, HeadDim>> = self
+            .heads
+            .iter()
+            .enumerate()
+            .map(|(h, head)| {
+                let mut slice = [[0.0; HeadDim]; Seq];
+                for s in 0..Seq {
+                    for d in 0..HeadDim {
+                        slice[s][d] = x.data[s][h * HeadDim + d];
+                    }
                 }
-            }
-            head.forward(&Matrix { data: slice })
-        }).collect();
+                head.forward(&Matrix { data: slice })
+            })
+            .collect();
 
         let mut concatenated = [[0.0; Dim]; Seq];
 
@@ -39,6 +51,6 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
             }
         }
 
-        self.w_o.forward_seq( &Matrix { data: concatenated })
+        self.w_o.forward_seq(&Matrix { data: concatenated })
     }
 }

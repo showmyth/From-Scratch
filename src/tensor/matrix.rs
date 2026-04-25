@@ -1,9 +1,6 @@
-use std::str::MatchIndices;
-
 pub struct Matrix<const MatrixRows: usize, const MatrixCols: usize> {
     pub data: [[f64; MatrixCols]; MatrixRows],
 }
-
 
 #[derive(Clone, Copy)]
 pub enum InitStrategy {
@@ -15,7 +12,9 @@ pub enum InitStrategy {
 impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, MatrixCols> {
     // basic type ops
     pub fn zeros() -> Self {
-        Self { data: [[0.0; MatrixCols]; MatrixRows] }
+        Self {
+            data: [[0.0; MatrixCols]; MatrixRows],
+        }
     }
 
     pub fn from_arr(data: [[f64; MatrixCols]; MatrixRows]) -> Self {
@@ -44,16 +43,16 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
 
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
-                    data[i][j] = randn(rng) * scale;
+                data[i][j] = randn(rng) * scale;
             }
         }
 
-        Self { data } 
+        Self { data }
     }
 
     // basic matrix ops
     // could do it inplace, instead of copying but thats for a later time
-    pub fn transpose(&self) ->  Matrix<MatrixCols, MatrixRows> {
+    pub fn transpose(&self) -> Matrix<MatrixCols, MatrixRows> {
         let mut data = [[0.0; MatrixRows]; MatrixCols];
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
@@ -61,9 +60,12 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
             }
         }
         Matrix { data }
-    } 
+    }
 
-    pub fn matmul<const Other: usize>(&self, rhs: &Matrix<MatrixCols, Other>) -> Matrix<MatrixRows, Other> {
+    pub fn matmul<const Other: usize>(
+        &self,
+        rhs: &Matrix<MatrixCols, Other>,
+    ) -> Matrix<MatrixRows, Other> {
         let mut data = [[0.0; Other]; MatrixRows];
         for i in 0..MatrixRows {
             for j in 0..Other {
@@ -82,24 +84,17 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
                 data[i][j] = self.data[i][j] * scalar;
             }
         }
-        Matrix { data } 
+        Matrix { data }
     }
 
-    // row-wise softmax
-    pub fn softmax_rows(&self) -> Matrix<MatrixRows, MatrixCols> {
+    pub fn add(&self, rhs: &Matrix<MatrixRows, MatrixCols>) -> Matrix<MatrixRows, MatrixCols> {
         let mut data = [[0.0; MatrixCols]; MatrixRows];
-
         for i in 0..MatrixRows {
-            let max_val = self.data[i].iter().copied().fold(f64::NEG_INFINITY, f64::max);
-            let mut exps = [0.0; MatrixCols];
             for j in 0..MatrixCols {
-                exps[j] = (self.data[i][j] - max_val).exp();
-            }
-            let sum: f64 = exps.iter().sum();
-            for j in 0..MatrixCols {
-                data[i][j] = exps[j] / sum;
+                data[i][j] = self.data[i][j] + rhs.data[i][j];
             }
         }
         Matrix { data }
     }
+
 }
