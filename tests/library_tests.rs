@@ -30,7 +30,7 @@ fn matrix_scale_and_softmax_rows_produce_normalized_rows() {
 
     let softmaxed = layers::activation::softmax_rows(&m);
     for row in softmaxed.data.iter() {
-        let row_sum: f64 = row.iter().sum();
+        let row_sum: f32 = row.iter().sum();
         assert!((row_sum - 1.0).abs() < 1e-10);
     }
 }

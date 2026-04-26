@@ -26,9 +26,9 @@ impl<const Dim: usize> Attention<Dim> {
         let v = self.w_v.forward_seq(x);
 
         // lets not do a one liner
-        // let scores = q.matmul(&k.transpose()).scale(1.0 / (Dim as f64).sqrt());
+        // let scores = q.matmul(&k.transpose()).scale(1.0 / (Dim as f32).sqrt());
 
-        let scale = (Dim as f64).sqrt();
+        let scale = (Dim as f32).sqrt();
         let mut scores = q.matmul(&k.transpose()).scale(1.0 / scale);
 
         // look before you leap
@@ -36,7 +36,7 @@ impl<const Dim: usize> Attention<Dim> {
         for i in 0..Seq {
             for j in (i + 1)..Seq {
                 // set everything above diag to neg inf
-                scores.data[i][j] = f64::NEG_INFINITY;
+                scores.data[i][j] = f32::NEG_INFINITY;
             }
         }
 

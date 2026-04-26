@@ -1,5 +1,5 @@
 pub struct Matrix<const MatrixRows: usize, const MatrixCols: usize> {
-    pub data: [[f64; MatrixCols]; MatrixRows],
+    pub data: [[f32; MatrixCols]; MatrixRows],
 }
 
 #[derive(Clone, Copy)]
@@ -17,15 +17,15 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
         }
     }
 
-    pub fn from_arr(data: [[f64; MatrixCols]; MatrixRows]) -> Self {
+    pub fn from_arr(data: [[f32; MatrixCols]; MatrixRows]) -> Self {
         Self { data }
     }
 
-    pub fn get(&self, row: usize, col: usize) -> f64 {
+    pub fn get(&self, row: usize, col: usize) -> f32 {
         self.data[row][col]
     }
 
-    pub fn set(&mut self, row: usize, col: usize, val: f64) {
+    pub fn set(&mut self, row: usize, col: usize, val: f32) {
         self.data[row][col] = val;
     }
 
@@ -35,8 +35,8 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
 
         let scale = match strategy.unwrap_or(InitStrategy::Naive) {
             InitStrategy::Naive => 0.01,
-            InitStrategy::Xavier => (2.0 / (MatrixRows + MatrixCols) as f64).sqrt(),
-            InitStrategy::He => (2.0 / MatrixRows as f64).sqrt(),
+            InitStrategy::Xavier => (2.0 / (MatrixRows + MatrixCols) as f32).sqrt(),
+            InitStrategy::He => (2.0 / MatrixRows as f32).sqrt(),
         };
 
         let mut data = [[0.0; MatrixCols]; MatrixRows];
@@ -77,7 +77,7 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
         Matrix { data }
     }
 
-    pub fn scale(&self, scalar: f64) -> Matrix<MatrixRows, MatrixCols> {
+    pub fn scale(&self, scalar: f32) -> Matrix<MatrixRows, MatrixCols> {
         let mut data = [[0.0; MatrixCols]; MatrixRows];
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
@@ -96,5 +96,4 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
         }
         Matrix { data }
     }
-
 }

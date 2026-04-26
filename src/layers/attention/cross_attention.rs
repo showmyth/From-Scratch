@@ -30,7 +30,7 @@ impl<const Dim: usize> CrossAttention<Dim> {
         let k = self.w_k.forward_seq(x_kv);
         let v = self.w_v.forward_seq(x_kv);
 
-        let scale = (Dim as f64).sqrt();
+        let scale = (Dim as f32).sqrt();
         let scores = q.matmul(&k.transpose()).scale(1.0 / scale);
 
         let scores = crate::layers::activation::softmax_rows(&scores);
