@@ -34,10 +34,10 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
                 let mut slice = [[0.0; HeadDim]; Seq];
                 for s in 0..Seq {
                     for d in 0..HeadDim {
-                        slice[s][d] = x.data[s][h * HeadDim + d];
+                        slice[s][d] = x.get(s, h * HeadDim + d);
                     }
                 }
-                head.forward(&Matrix { data: slice })
+                head.forward(&Matrix::from_arr(slice))
             })
             .collect();
 
@@ -46,11 +46,11 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadAttention<Dim, HeadDim> {
         for (h, head_out) in head_outputs.iter().enumerate() {
             for s in 0..Seq {
                 for d in 0..HeadDim {
-                    concatenated[s][h * HeadDim + d] = head_out.data[s][d];
+                    concatenated[s][h * HeadDim + d] = head_out.get(s, d);
                 }
             }
         }
 
-        self.w_o.forward_seq(&Matrix { data: concatenated })
+        self.w_o.forward_seq(&Matrix::from_arr(concatenated))
     }
 }

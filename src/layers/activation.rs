@@ -6,7 +6,7 @@ pub fn relu<const ArraySize: usize>(x: &Array<ArraySize>) -> Array<ArraySize> {
     for i in 0..ArraySize {
         data[i] = x.data[i].max(0.0);
     }
-    Array { data }
+    Array { data: data.to_vec() }
 }
 
 pub fn gelu<const ArraySize: usize>(x: &Array<ArraySize>) -> Array<ArraySize> {
@@ -17,7 +17,7 @@ pub fn gelu<const ArraySize: usize>(x: &Array<ArraySize>) -> Array<ArraySize> {
         let val = x.data[i];
         data[i] = 0.5 * val * (1.0 + (sqrt_2_over_pi * (val + 0.044715 * val.powi(3))).tanh());
     }
-    Array { data }
+    Array { data: data.to_vec() }
 }
 
 pub fn softmax<const ArraySize: usize>(x: &Array<ArraySize>) -> Array<ArraySize> {
@@ -38,7 +38,7 @@ pub fn softmax<const ArraySize: usize>(x: &Array<ArraySize>) -> Array<ArraySize>
         result[i] = exps[i] / sum_exps;
     }
 
-    Array { data: result }
+    Array { data: result.to_vec() }
 }
 
 pub fn softmax_rows<const Rows: usize, const Cols: usize>(
@@ -47,15 +47,15 @@ pub fn softmax_rows<const Rows: usize, const Cols: usize>(
     let mut data = [[0.0; Cols]; Rows];
 
     for i in 0..Rows {
-        let max_val = x.data[i].iter().copied().fold(f32::NEG_INFINITY, f32::max);
+        let max_val = x.get_row(i).iter().copied().fold(f32::NEG_INFINITY, f32::max);
         let mut exps = [0.0; Cols];
         for j in 0..Cols {
-            exps[j] = (x.data[i][j] - max_val).exp();
+            exps[j] = (x.get(i, j) - max_val).exp();
         }
         let sum: f32 = exps.iter().sum();
         for j in 0..Cols {
             data[i][j] = exps[j] / sum;
         }
     }
-    Matrix { data }
+    Matrix::from_arr(data)
 }

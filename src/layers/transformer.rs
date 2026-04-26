@@ -115,25 +115,21 @@ mod tests {
 
         // Assert shape is correct (implicitly done by Rust's const generics)
         // and check that we actually got numbers back
-        assert!(!output.data[0][0].is_nan());
+        assert!(!output.data[0].is_nan());
 
         println!("Transformer forward pass completed successfully!");
         println!("Output shape: [{}, {}]", SEQ_TGT, VOCAB_SIZE);
         println!(
             "First token's first 5 vocab logits: {:?}",
-            &output.data[0][..5]
+            &output.data[..5]
         );
     }
 
     #[test]
     fn test_transformer_stress() {
-        // Let's push the limits of our stack-allocated Matrix design!
-        // A standard "base" model has DIM=512, Vocab=50000.
-        // Because we use raw arrays like [[f32; C]; R] which live on the stack (which is usually limited to 2MB - 8MB),
-        // let's try a medium-sized config that represents a "toy" real-world language model.
         const DIM: usize = 128;
         const HEAD_DIM: usize = 32; // 4 heads * 32 dim = 128
-        const HIDDEN: usize = 512; // Usually 4x DIM
+        const HIDDEN: usize = 512; // usually 4x DIM
         const VOCAB_SIZE: usize = 5000;
         const SEQ_SRC: usize = 64;
         const SEQ_TGT: usize = 64;
@@ -154,7 +150,7 @@ mod tests {
         println!("Running forward pass through all 6 layers...");
         let output = transformer.forward(&src_input, &tgt_input);
 
-        assert!(!output.data[0][0].is_nan());
+        assert!(!output.data[0].is_nan());
         println!(
             "Stress test passed! Output size: [{}, {}]",
             SEQ_TGT, VOCAB_SIZE

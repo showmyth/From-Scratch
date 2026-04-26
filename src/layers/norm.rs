@@ -41,9 +41,9 @@ impl<const Dim: usize> Norm<Dim> {
     ) -> crate::tensor::matrix::Matrix<Seq, Dim> {
         let mut out = [[0.0; Dim]; Seq];
         for i in 0..Seq {
-            let arr = Array::from_arr(x.data[i]);
+            let arr = Array { data: x.get_row(i) };
             let res = self.forward(&arr);
-            out[i] = res.data;
+            out[i] = res.data.try_into().unwrap();
         }
         crate::tensor::matrix::Matrix::from_arr(out)
     }

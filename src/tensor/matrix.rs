@@ -1,5 +1,6 @@
 pub struct Matrix<const MatrixRows: usize, const MatrixCols: usize> {
-    pub data: [[f32; MatrixCols]; MatrixRows],
+    // 1D flat vector instead of 2D array
+    pub data: Vec<f32>,
 }
 
 #[derive(Clone, Copy)]
@@ -10,26 +11,37 @@ pub enum InitStrategy {
 }
 
 impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, MatrixCols> {
-    // basic type ops
     pub fn zeros() -> Self {
         Self {
-            data: [[0.0; MatrixCols]; MatrixRows],
+            data: vec![0.0; MatrixRows * MatrixCols],
         }
     }
 
-    pub fn from_arr(data: [[f32; MatrixCols]; MatrixRows]) -> Self {
+    // Still takes a 2D array for convenience of manual initialization
+    pub fn from_arr(arr: [[f32; MatrixCols]; MatrixRows]) -> Self {
+        let mut data = Vec::with_capacity(MatrixRows * MatrixCols);
+        for i in 0..MatrixRows {
+            for j in 0..MatrixCols {
+                data.push(arr[i][j]);
+            }
+        }
         Self { data }
     }
 
+    
+    pub fn get_row(&self, row: usize) -> Vec<f32> {
+        let start = row * MatrixCols;
+        self.data[start..start + MatrixCols].to_vec()
+    }
+
     pub fn get(&self, row: usize, col: usize) -> f32 {
-        self.data[row][col]
+        self.data[row * MatrixCols + col]
     }
 
     pub fn set(&mut self, row: usize, col: usize, val: f32) {
-        self.data[row][col] = val;
+        self.data[row * MatrixCols + col] = val;
     }
 
-    // randn wrapper
     pub fn randn(rng: &mut u64, strategy: Option<InitStrategy>) -> Self {
         use crate::helpers::helper_math::randn;
 
@@ -39,24 +51,23 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
             InitStrategy::He => (2.0 / MatrixRows as f32).sqrt(),
         };
 
-        let mut data = [[0.0; MatrixCols]; MatrixRows];
+        let mut data = vec![0.0; MatrixRows * MatrixCols];
 
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
-                data[i][j] = randn(rng) * scale;
+                data[i * MatrixCols + j] = randn(rng) as f32 * scale;
             }
         }
 
         Self { data }
     }
 
-    // basic matrix ops
-    // could do it inplace, instead of copying but thats for a later time
     pub fn transpose(&self) -> Matrix<MatrixCols, MatrixRows> {
-        let mut data = [[0.0; MatrixRows]; MatrixCols];
+        let mut data = vec![0.0; MatrixRows * MatrixCols];
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
-                data[j][i] = self.data[i][j];
+                // write into j, i
+                data[j * MatrixRows + i] = self.data[i * MatrixCols + j];
             }
         }
         Matrix { data }
@@ -66,32 +77,34 @@ impl<const MatrixRows: usize, const MatrixCols: usize> Matrix<MatrixRows, Matrix
         &self,
         rhs: &Matrix<MatrixCols, Other>,
     ) -> Matrix<MatrixRows, Other> {
-        let mut data = [[0.0; Other]; MatrixRows];
+        let mut data = vec![0.0; MatrixRows * Other];
         for i in 0..MatrixRows {
             for j in 0..Other {
+                let mut sum = 0.0;
                 for k in 0..MatrixCols {
-                    data[i][j] += self.data[i][k] * rhs.data[k][j];
+                    sum += self.data[i * MatrixCols + k] * rhs.data[k * Other + j];
                 }
+                data[i * Other + j] = sum;
             }
         }
         Matrix { data }
     }
 
     pub fn scale(&self, scalar: f32) -> Matrix<MatrixRows, MatrixCols> {
-        let mut data = [[0.0; MatrixCols]; MatrixRows];
+        let mut data = vec![0.0; MatrixRows * MatrixCols];
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
-                data[i][j] = self.data[i][j] * scalar;
+                data[i * MatrixCols + j] = self.data[i * MatrixCols + j] * scalar;
             }
         }
         Matrix { data }
     }
 
     pub fn add(&self, rhs: &Matrix<MatrixRows, MatrixCols>) -> Matrix<MatrixRows, MatrixCols> {
-        let mut data = [[0.0; MatrixCols]; MatrixRows];
+        let mut data = vec![0.0; MatrixRows * MatrixCols];
         for i in 0..MatrixRows {
             for j in 0..MatrixCols {
-                data[i][j] = self.data[i][j] + rhs.data[i][j];
+                data[i * MatrixCols + j] = self.data[i * MatrixCols + j] + rhs.data[i * MatrixCols + j];
             }
         }
         Matrix { data }

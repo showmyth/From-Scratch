@@ -36,7 +36,7 @@ impl<const Dim: usize> Attention<Dim> {
         for i in 0..Seq {
             for j in (i + 1)..Seq {
                 // set everything above diag to neg inf
-                scores.data[i][j] = f32::NEG_INFINITY;
+                scores.set(i, j, f32::NEG_INFINITY);
             }
         }
 

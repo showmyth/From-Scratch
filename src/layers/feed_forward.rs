@@ -23,13 +23,13 @@ impl<const Dim: usize, const Hidden: usize> FeedForward<Dim, Hidden> {
         let mut out = [[0.0; Dim]; Seq];
 
         for i in 0..Seq {
-            let row = crate::tensor::array::Array::from_arr(x.data[i]);
+            let row = crate::tensor::array::Array { data: x.get_row(i) };
             // fc1: Dim -> Hidden
             let hidden = self.fc1.forward(&row);
             // GELU activation
             let activated = activation::gelu(&hidden);
             // fc2: Hidden -> Dim
-            out[i] = self.fc2.forward(&activated).data;
+            out[i] = self.fc2.forward(&activated).data.try_into().unwrap();
         }
 
         Matrix::from_arr(out)

@@ -46,7 +46,7 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadCrossAttention<Dim, HeadDi
                 let mut slice_q = [[0.0; HeadDim]; SeqQ];
                 for s in 0..SeqQ {
                     for d in 0..HeadDim {
-                        slice_q[s][d] = x_q.data[s][h * HeadDim + d];
+                        slice_q[s][d] = x_q.get(s, h * HeadDim + d);
                     }
                 }
 
@@ -54,11 +54,11 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadCrossAttention<Dim, HeadDi
                 let mut slice_kv = [[0.0; HeadDim]; SeqKV];
                 for s in 0..SeqKV {
                     for d in 0..HeadDim {
-                        slice_kv[s][d] = x_kv.data[s][h * HeadDim + d];
+                        slice_kv[s][d] = x_kv.get(s, h * HeadDim + d);
                     }
                 }
 
-                head.forward_cross(&Matrix { data: slice_q }, &Matrix { data: slice_kv })
+                head.forward_cross(&Matrix::from_arr(slice_q), &Matrix::from_arr(slice_kv))
             })
             .collect();
 
@@ -67,11 +67,11 @@ impl<const Dim: usize, const HeadDim: usize> MultiHeadCrossAttention<Dim, HeadDi
         for (h, head_out) in head_outputs.iter().enumerate() {
             for s in 0..SeqQ {
                 for d in 0..HeadDim {
-                    concatenated[s][h * HeadDim + d] = head_out.data[s][d];
+                    concatenated[s][h * HeadDim + d] = head_out.get(s, d);
                 }
             }
         }
 
-        self.w_o.forward_seq(&Matrix { data: concatenated })
+        self.w_o.forward_seq(&Matrix::from_arr(concatenated))
     }
 }

@@ -17,7 +17,7 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         Self {
             weights: weights_data,
             bias: Array {
-                data: [0.0; OutputSize],
+                data: vec![0.0; OutputSize],
             },
             grad_weights: None,
             grad_bias: None,
@@ -33,7 +33,7 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
             res[i] += self.bias.data[i];
         }
 
-        Array { data: res }
+        Array { data: res.to_vec() }
     }
 
     pub fn forward_seq<const Seq: usize>(
@@ -45,12 +45,12 @@ impl<const InputSize: usize, const OutputSize: usize> Linear<InputSize, OutputSi
         for s in 0..Seq {
             for i in 0..OutputSize {
                 for j in 0..InputSize {
-                    data[s][i] += self.weights.get(j, i) * input.data[s][j];
+                    data[s][i] += self.weights.get(j, i) * input.get(s, j);
                 }
                 data[s][i] += self.bias.data[i];
             }
         }
 
-        Matrix { data }
+        Matrix::from_arr(data)
     }
 }

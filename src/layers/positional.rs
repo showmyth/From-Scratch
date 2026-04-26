@@ -27,7 +27,7 @@ impl<const Seq: usize, const Dim: usize> PositionalEncoding<Seq, Dim> {
         }
 
         Self {
-            pe: Matrix { data },
+            pe: Matrix::from_arr(data),
         }
     }
 
