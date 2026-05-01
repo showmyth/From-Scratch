@@ -5,7 +5,7 @@ try:
 except ImportError:
     from layers.linear import Linear
     from layers.activations import relu, gelu
-    
+
 class Feed_Forward:
     def __init__(self, d_model, d_ff):
         self.d_model = d_model
@@ -22,7 +22,6 @@ class Feed_Forward:
         # pass through layer 2 => linear2
         out = self.linear2.forward(out)
         return out
-
 
 if __name__ == "__main__":
     B, S, d_model, d_ff = 2 ,5 ,8, 16
