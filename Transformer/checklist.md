@@ -4,10 +4,10 @@
 - [x] linear.py 
 - [x] activations.py 
 - [x] layer_norm.py 
-- [ ] attention.py 
+- [x] attention.py 
 
 2. Model + Aux
-- [ ] feed_forward.py
+- [x] feed_forward.py
 - [ ] encoder.py 
 - [ ] decoder.py 
 - [ ] positional.py
